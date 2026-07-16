@@ -1,0 +1,109 @@
+body { font-family: 'Zen Maru Gothic', sans-serif; }
+.jp-title, .mantra-text { font-family: 'Zen Antique Soft', serif; }
+
+input[type="text"], input[type="number"], textarea, select {
+  font-size: 16px;
+  touch-action: manipulation;
+}
+button, a { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+
+/* ===== gentle glow visual (replaces realistic eye imagery) ===== */
+.glow-orb {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #6366f1 0%, #a5b4fc 45%, rgba(165,180,252,0) 75%);
+  box-shadow: 0 0 36px 12px rgba(99, 102, 241, 0.18);
+}
+
+/* ===== chakra / special card ===== */
+.chakra-card { transition: box-shadow .25s ease, transform .15s ease; }
+.chakra-card:hover { transform: translateY(-1px); }
+
+.player-progress-track { background: #e7e5e4; border-radius: 999px; height: 6px; overflow: hidden; }
+.player-progress-fill { background: currentColor; height: 100%; width: 0%; transition: width .2s linear; }
+
+/* ===== chips ===== */
+.chip {
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #e7e5e4;
+  background: #fff;
+  color: #57534e;
+  cursor: pointer;
+  transition: all .15s ease;
+  user-select: none;
+}
+.chip:hover { border-color: #c7d2fe; }
+.chip.active {
+  background: #3730a3;
+  border-color: #3730a3;
+  color: #fff;
+}
+
+/* ===== calendar review ===== */
+.cal-day {
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: #fafaf9;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #78716c;
+  cursor: pointer;
+  transition: all .15s ease;
+  position: relative;
+}
+.cal-day:hover { background: #f0eeec; }
+.cal-day.has-entry { background: #eef2ff; color: #3730a3; }
+.cal-day.has-entry::after {
+  content: '';
+  position: absolute;
+  bottom: 4px; left: 50%;
+  transform: translateX(-50%);
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: #4338ca;
+}
+.cal-day.today { box-shadow: 0 0 0 2px #a5b4fc inset; }
+.cal-day.selected { background: #3730a3; color: #fff; }
+.cal-day.selected::after { background: #fff; }
+
+.timeline-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  display: inline-block;
+}
+
+.week-dot {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  background: #f5f5f4; color: #a8a29e;
+  border: 1px solid #e7e5e4;
+}
+.week-dot.done { background: #3730a3; color: #fff; border-color: #3730a3; }
+.week-dot.today { box-shadow: 0 0 0 2px #a5b4fc; }
+
+/* ===== step accordion ===== */
+.step-card summary { cursor: pointer; list-style: none; }
+.step-card summary::-webkit-details-marker { display: none; }
+.step-card[open] .step-chevron { transform: rotate(180deg); }
+.step-chevron { transition: transform .2s ease; }
+
+@media print {
+  nav, footer, #journalForm button, .no-print { display: none !important; }
+}

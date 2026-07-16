@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>第六眼を開く | 密教相承 梵輪開眼瞑想法</title>
+<meta name="description" content="音の科学と1200年前から伝わる密教の知恵を組み合わせ、5つの手順でサードアイ(第六眼)を目覚めさせる実践ガイド。梵輪Music・視る練習・瞑想日記つき。" />
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👁️</text></svg>" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Zen+Antique+Soft&family=Zen+Maru+Gothic:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          sand: {
+            50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
+            300: '#d6d3d1', 400: '#a8a29e', 500: '#78716c',
+            800: '#292524', 900: '#1c1917',
+          },
+          spiritual: {
+            root: '#991b1b', sacral: '#ea580c', solar: '#ca8a04',
+            heart: '#15803d', throat: '#0369a1', thirdeye: '#4338ca', crown: '#7e22ce',
+          },
+        },
+        fontFamily: {
+          serif: ['Cinzel', 'serif'],
+          sans: ['Zen Maru Gothic', 'sans-serif'],
+          jp: ['Zen Antique Soft', 'serif'],
+        },
+        animation: {
+          'breathe': 'breathe 8s ease-in-out infinite',
+          'fade-in': 'fadeIn 0.6s ease-out forwards',
+        },
+        keyframes: {
+          breathe: { '0%, 100%': { opacity: '0.75', transform: 'scale(1)' }, '50%': { opacity: '0.35', transform: 'scale(1.06)' } },
+          fadeIn: { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+        },
+      },
+    },
+  }
+</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen bg-sand-50 text-stone-800 font-sans antialiased">
+
+<!-- ===== NAV ===== -->
+<nav class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-sand-200">
+  <div class="max-w-5xl mx-auto px-4">
+    <div class="flex items-center justify-between h-14">
+      <a href="#home" class="flex items-center gap-2 font-serif tracking-wide text-xs sm:text-sm text-indigo-900">
+        <span>BONRIN KAIGEN</span>
+      </a>
+      <button id="navToggle" class="sm:hidden text-stone-600 text-2xl leading-none" aria-label="メニュー">☰</button>
+      <div id="navLinks" class="hidden sm:flex items-center gap-5 text-xs font-bold text-stone-500 no-scrollbar overflow-x-auto">
+        <a href="#music" class="nav-link hover:text-indigo-700 whitespace-nowrap">梵輪Music</a>
+        <a href="#method" class="nav-link hover:text-indigo-700 whitespace-nowrap">5つの手順</a>
+        <a href="#seeing" class="nav-link hover:text-indigo-700 whitespace-nowrap">視る練習</a>
+        <a href="#wisdom" class="nav-link hover:text-indigo-700 whitespace-nowrap">空海と密教</a>
+        <a href="#safety" class="nav-link hover:text-indigo-700 whitespace-nowrap">好転反応</a>
+        <a href="#journal" class="nav-link hover:text-indigo-700 whitespace-nowrap">瞑想日記</a>
+      </div>
+    </div>
+    <div id="navLinksMobile" class="hidden sm:hidden flex-col gap-1 pb-3 text-sm font-bold text-stone-600">
+      <a href="#music" class="nav-link block py-1.5">梵輪Music</a>
+      <a href="#method" class="nav-link block py-1.5">5つの手順</a>
+      <a href="#seeing" class="nav-link block py-1.5">視る練習</a>
+      <a href="#wisdom" class="nav-link block py-1.5">空海と密教</a>
+      <a href="#safety" class="nav-link block py-1.5">好転反応</a>
+      <a href="#journal" class="nav-link block py-1.5">瞑想日記</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<header id="home" class="relative overflow-hidden">
+  <div class="max-w-5xl mx-auto px-4 pt-12 pb-10 md:pt-16 md:pb-14">
+    <div class="grid md:grid-cols-5 gap-8 items-center">
+      <div class="md:col-span-3">
+        <p class="text-xs font-serif tracking-[0.25em] text-indigo-700 mb-3">ADVENTURE START GUIDE</p>
+        <h1 class="jp-title text-3xl md:text-[2.6rem] leading-snug text-stone-900 mb-4">
+          第六眼を開く<br class="hidden md:block">
+          <span class="text-indigo-800">密教相承</span> 梵輪開眼瞑想法
+        </h1>
+        <p class="text-sm md:text-base text-stone-600 leading-relaxed mb-5">
+          現代の「音の科学」と、1200年前から伝わる「密教」の知恵を組み合わせ、自分の中に眠る第六眼(サードアイ)を意識する修行を、5つの手順に分けてやさしく案内します。
+        </p>
+        <div class="bg-amber-50 rounded-xl p-4 border border-amber-100 text-xs md:text-sm text-amber-800 leading-relaxed mb-5">
+          <span class="font-bold">安全の約束：</span> 特別な能力を無理に引き出す教材ではありません。頭痛や強い不安が出たら中止し、休息や医療を優先してください。
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <a href="#method" class="inline-flex items-center gap-2 bg-indigo-800 text-white px-6 py-3 rounded-full text-sm font-bold hover:opacity-90 transition-all shadow-md">5つの手順をはじめる</a>
+          <a href="#journal" class="inline-flex items-center gap-2 bg-white text-indigo-800 px-6 py-3 rounded-full text-sm font-bold border border-indigo-200 hover:bg-indigo-50 transition-all">今日の記録をつける</a>
+        </div>
+      </div>
+      <div class="md:col-span-2 relative">
+        <div class="absolute inset-0 bg-indigo-200/40 rounded-full blur-3xl animate-breathe"></div>
+        <img src="images/mandala.jpg" alt="密教の宇宙観を表す曼荼羅、中央上部に第六眼が描かれている" class="relative rounded-2xl shadow-lg border border-sand-200 w-full max-w-sm mx-auto">
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 pb-16">
+
+  <!-- ===== MUSIC SECTION ===== -->
+  <section id="music" class="scroll-mt-16 py-8">
+    <p class="text-xs font-serif tracking-[0.25em] text-indigo-700 mb-2">FREQUENCY PLAYER</p>
+    <h2 class="jp-title text-2xl md:text-3xl text-stone-900 mb-2">梵輪Music — 7つのチャクラ + サードアイ開眼専用</h2>
+    <p class="text-sm text-stone-600 leading-relaxed mb-2">イヤホンまたはスピーカーで小さめに再生してください。長時間の大音量再生は避けます。特定の周波数がチャクラを活性化する効果は科学的に確立したものではなく、この教材では集中や切り替えを助ける目印として使います。</p>
+    <p class="text-xs text-stone-400 mb-2">※すべての音はこのページ内でその場で生成されます（音源ファイルのダウンロードはありません）</p>
+    <p class="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-6 leading-relaxed">※再生中に画面が自動的にロックされないよう調整していますが、他のアプリに切り替えたり、手動で画面を消したりすると、スマートフォンの機種やブラウザによっては音が途中で止まることがあります。再生中は画面をつけたまま、このページを開いておくことをおすすめします。</p>
+
+    <div id="chakraGrid" class="grid sm:grid-cols-2 gap-4 mb-4"></div>
+
+    <div id="specialTrackWrap" class="mt-2"></div>
+  </section>
+
+  <!-- ===== 5-STEP METHOD ===== -->
+  <section id="method" class="scroll-mt-16 py-8 border-t border-sand-200">
+    <p class="text-xs font-serif tracking-[0.25em] text-indigo-700 mb-2">TRAINING FLOW</p>
+    <h2 class="jp-title text-2xl md:text-3xl text-stone-900 mb-2">第六眼開眼トレーニング — 5つの手順</h2>
+    <p class="text-sm text-stone-600 leading-relaxed mb-6">瞑想は「なんとなく座る」だけでは続きません。ここでは、準備から実践、そして記録まで、迷わず進められるように手順を分けています。カードをタップすると詳しいやり方が開きます。</p>
+
+    <figure class="relative mb-8 rounded-2xl overflow-hidden border border-sand-200 shadow-sm">
+      <img src="images/mandala.jpg" alt="曼荼羅に描かれた大日如来と、その真上に置かれた第六眼" class="w-full max-h-80 object-cover object-top">
+      <div class="absolute inset-0 bg-gradient-to-t from-stone-900/80 via-stone-900/10 to-transparent"></div>
+      <figcaption class="absolute bottom-0 left-0 right-0 p-4 md:p-5">
+        <p class="text-white text-sm md:text-base font-bold leading-snug">曼荼羅の中心・大日如来の真上に置かれた第六眼</p>
+        <p class="text-stone-200 text-xs mt-1 leading-relaxed">この修行が目指すのは、眉間の奥にこの光をそっと置く感覚を育てることです。</p>
+      </figcaption>
+    </figure>
+
+    <div id="stepsList" class="space-y-4"></div>
+  </section>
+
+  <!-- ===== SEEING PRACTICE (detailed) ===== -->
+  <section id="seeing" class="scroll-mt-16 py-8 border-t border-sand-200">
+    <p class="text-xs font-serif tracking-[0.25em] text-indigo-700 mb-2">SEEING PRACTICE</p>
+    <h2 class="jp-title text-2xl md:text-3xl text-stone-900 mb-2">サードアイで「視る」練習 — 9つの手順</h2>
+    <p class="text-sm text-stone-600 leading-relaxed mb-6">上の「手順3」をさらに丁寧に分解した、実践そのままの手順書です。順番どおりに進めれば迷いません。慣れてきたら手順6の月輪観まで進めましょう。</p>
+
+    <ol id="seeingSteps" class="space-y-3"></ol>
+
+    <div class="mt-6 bg-white rounded-2xl overflow-hidden shadow-sm border border-sand-200">
+      <div class="grid sm:grid-cols-2">
+        <img src="images/mandala-center.jpg" alt="曼荼羅の中央に描かれた仏の姿。大日如来を思わせるイメージ" class="w-full h-56 sm:h-full object-cover">
+        <div class="p-5 md:p-6">
+          <p class="text-[11px] font-bold tracking-widest text-indigo-700 mb-1">EXTRA・上級者向け・任意</p>
+          <h3 class="font-bold text-stone-800 mb-2">曼荼羅凝視（ぎょうし）トレーニング — 1分間見つめる</h3>
+          <p class="text-xs text-stone-600 leading-relaxed mb-3">曼荼羅の中央に描かれた、大日如来を思わせる仏の姿を1分間見つめる練習です。9つの手順に慣れてきたら、手順1〜3のあとに追加してみましょう。</p>
+          <ol class="space-y-1.5 mb-3">
+            <li class="text-xs text-stone-600 leading-relaxed flex gap-2"><span class="text-indigo-300 shrink-0">1.</span><span>画像の中心（仏の眉間のあたり）に視線を置き、1分間、まばたきは我慢せず自然に行いながら見つめ続けます。</span></li>
+            <li class="text-xs text-stone-600 leading-relaxed flex gap-2"><span class="text-indigo-300 shrink-0">2.</span><span>1分たったら目を閉じ、まぶたの裏に残る光や色の残像を、判断せずにただ眺めます。</span></li>
+            <li class="text-xs text-stone-600 leading-relaxed flex gap-2"><span class="text-indigo-300 shrink-0">3.</span><span>残像が消えたら、手順4の「眉間の奥に藍色の光を置く」へ静かに移ります。</span></li>
+          </ol>
+          <div class="bg-amber-50 rounded-lg p-3 border border-amber-100 text-[11px] text-amber-800 leading-relaxed">
+            目が疲れやすい方、緑内障など目の疾患がある方は無理に行わないでください。ドライアイや充血、めまいを感じたら、すぐに目を閉じて休みます。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 bg-indigo-50 rounded-2xl p-5 border border-indigo-100">
+      <h3 class="font-bold text-indigo-900 mb-2 text-sm">この練習で育てたいこと</h3>
+      <p class="text-sm text-indigo-800 leading-relaxed">ひらめきや物事を見る視点、心の静けさに気づく力を育てます。特別な映像がはっきり見えることを競う練習ではありません。感じ方には個人差があり、光が見えなくても失敗ではありません。第六眼とは「未来を当てる力」ではなく、<span class="font-bold">心の奥を澄ませ、ものごとの本質を静かに観る力</span>です。</p>
+    </div>
+  </section>
+
+  <!-- ===== WISDOM: KUKAI & MIKKYO ===== -->
+  <section id="wisdom" class="scroll-mt-16 py-8 border-t border-sand-200">
+    <p class="text-xs font-serif tracking-[0.25em] text-indigo-700 mb-2">KUKAI AND ESOTERIC BUDDHISM</p>
+    <h2 class="jp-title text-2xl md:text-3xl text-stone-900 mb-6">空海と密教 — 手順4のもうひとつの軸</h2>
+
+    <div id="wisdomCards" class="grid md:grid-cols-2 gap-4"></div>
+  </section>
+
+  <!-- ===== SAFETY / ADVERSE REACTIONS ===== -->
+  <section id="safety" class="scroll-mt-16 py-8 border-t border-sand-200">
+    <p class="text-xs font-serif tracking-[0.25em] text-red-700 mb-2">SAFETY FIRST</p>
+    <h2 class="jp-title text-2xl md:text-3xl text-stone-900 mb-2">好転反応が出た時に — 困ったときの対応表</h2>
+    <div class="bg-red-50 rounded-2xl p-5 border border-red-100 mb-6">
+      <h3 class="font-bold text-red-900 mb-2 text-sm">好転反応（こうてんはんのう）とは</h3>
+      <p class="text-xs text-red-800 leading-relaxed">瞑想や心身のケアを始めた直後に、眠気・だるさ・軽い頭痛・感情の揺れなどが一時的に強く出ることがあり、これを「好転反応」と呼ぶことがあります。体や心が変化に適応しようとする過程で起きると考えられていますが、医学的に確立した用語ではありません。強い症状が続く場合は、我慢して続けず、休息や医療機関への相談を優先してください。回復の兆しになることもあります。</p>
+    </div>
+
+    <p class="text-sm text-stone-600 leading-relaxed mb-6">次の表は、実践中によく起きることをまとめたものです。がまんして続けるより、早めに調整するほうが安全で上達も早くなります。タップすると対応方法が開きます。</p>
+
+    <div id="safetyTable" class="space-y-3 mb-6"></div>
+
+    <div class="grid sm:grid-cols-3 gap-3">
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-red-100">
+        <p class="font-bold text-red-800 text-sm mb-1">安全第一</p>
+        <p class="text-xs text-stone-600 leading-relaxed">強い不快感がある日は休みます。休むことも実践の一部です。</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-teal-100">
+        <p class="font-bold text-teal-800 text-sm mb-1">短く続ける</p>
+        <p class="text-xs text-stone-600 leading-relaxed">5分を丁寧に行うほうが、30分を無理するより役立ちます。</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-indigo-100">
+        <p class="font-bold text-indigo-800 text-sm mb-1">記録で育てる</p>
+        <p class="text-xs text-stone-600 leading-relaxed">見えたものより、体と心の変化をやさしく残します。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== JOURNAL ===== -->
+  <section id="journal" class="scroll-mt-16 py-8 border-t border-sand-200">
+    <p class="text-xs font-serif tracking-[0.25em] text-indigo-700 mb-2">MEDITATION JOURNAL</p>
+    <h2 class="jp-title text-2xl md:text-3xl text-stone-900 mb-2">瞑想の記録</h2>
+    <p class="text-sm text-stone-600 leading-relaxed mb-6">チェック項目を選ぶだけ＋ひとこと入力の、続けやすい記録です。データはこのブラウザに自動保存され、下のカレンダーでいつでも振り返れます。</p>
+
+    <!-- streak strip -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-sand-200 mb-5">
+      <div class="flex items-center justify-between mb-3 gap-2">
+        <p class="text-sm font-bold text-stone-700">今週の実践ストリーク</p>
+        <p id="streakBadge" class="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full shrink-0">🔥 0日連続</p>
+      </div>
+      <div id="weekStrip" class="grid grid-cols-7 gap-1.5 sm:gap-2"></div>
+    </div>
+
+    <!-- 7/21/49-day milestones -->
+    <div class="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-sand-200 mb-5">
+      <h3 class="font-bold text-stone-800 mb-1">実践の節目 — 7日・21日・49日</h3>
+      <p class="text-xs text-stone-500 leading-relaxed mb-4">密教の行や仏教の法要では、昔から7日を一つの区切りとして数えてきました。この教材でも、無理のない目安の目標として同じ節目を採用しています。</p>
+      <div id="milestoneList" class="space-y-3"></div>
+    </div>
+
+    <!-- today entry form -->
+    <form id="journalForm" class="bg-white rounded-2xl p-4 sm:p-5 md:p-6 shadow-sm border border-sand-200 mb-5">
+      <div class="flex flex-wrap items-center justify-between gap-1 mb-4">
+        <h3 class="font-bold text-stone-800" id="journalDateLabel">今日の記録</h3>
+        <span class="text-xs text-stone-400">※データはお使いのブラウザに自動保存されます</span>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4 mb-4">
+        <label class="block">
+          <span class="text-xs font-bold text-stone-500">実践時間（分）</span>
+          <input type="number" id="fieldMinutes" min="1" max="120" placeholder="例：10" class="mt-1 w-full rounded-lg border border-sand-300 px-3 py-2 text-sm">
+        </label>
+        <label class="block">
+          <span class="text-xs font-bold text-stone-500">今日聴いた音源</span>
+          <select id="fieldTrack" class="mt-1 w-full rounded-lg border border-sand-300 px-3 py-2 text-sm bg-white">
+            <option value="">選択なし</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="mb-4">
+        <p class="text-xs font-bold text-stone-500 mb-2">体の感覚（選択式・複数可）</p>
+        <div id="chipsBody" class="flex flex-wrap gap-2"></div>
+      </div>
+      <div class="mb-4">
+        <p class="text-xs font-bold text-stone-500 mb-2">心の状態（選択式・複数可）</p>
+        <div id="chipsMind" class="flex flex-wrap gap-2"></div>
+      </div>
+      <div class="mb-4">
+        <p class="text-xs font-bold text-stone-500 mb-2">見えた光・映像（選択式・複数可）</p>
+        <div id="chipsVision" class="flex flex-wrap gap-2"></div>
+      </div>
+
+      <label class="block mb-4">
+        <span class="text-xs font-bold text-stone-500">今日の気づき（一言でOK）</span>
+        <textarea id="fieldNote" rows="2" placeholder="例：眉間がむずむずした／特に何もなし" class="mt-1 w-full rounded-lg border border-sand-300 px-3 py-2 text-sm"></textarea>
+      </label>
+
+      <div class="flex gap-3">
+        <button type="submit" class="flex-1 bg-indigo-800 text-white px-6 py-3 rounded-full text-sm font-bold hover:opacity-90 transition-all shadow-md">今日の記録を保存</button>
+        <button type="button" id="clearTodayBtn" class="px-5 py-3 rounded-full text-sm font-bold border border-sand-300 text-stone-500 hover:bg-sand-50 transition-all">クリア</button>
+      </div>
+    </form>
+
+    <!-- calendar review -->
+    <div class="bg-white rounded-2xl p-3 sm:p-5 md:p-6 shadow-sm border border-sand-200">
+      <div class="flex items-center justify-between mb-4 px-1">
+        <h3 class="font-bold text-stone-800 text-sm sm:text-base">カレンダーで振り返る</h3>
+        <div class="flex items-center gap-1 sm:gap-3">
+          <button type="button" id="calPrevBtn" class="text-stone-400 hover:text-stone-700 text-sm px-2 py-1 -mx-1">◀</button>
+          <p id="calLabel" class="text-sm font-bold text-stone-700 min-w-[5.5rem] sm:min-w-[6.5rem] text-center"></p>
+          <button type="button" id="calNextBtn" class="text-stone-400 hover:text-stone-700 text-sm px-2 py-1 -mx-1">▶</button>
+        </div>
+      </div>
+      <div id="calWeekHeader" class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-stone-400 mb-1"></div>
+      <div id="calGrid" class="grid grid-cols-7 gap-1 mb-4"></div>
+      <div id="calDayDetail" class="bg-sand-50 rounded-xl p-3 sm:p-4 border border-sand-100"></div>
+    </div>
+
+    <!-- consultation support -->
+    <details class="step-card mt-5 bg-white rounded-2xl shadow-sm border border-sand-200 overflow-hidden">
+      <summary class="p-5 md:p-6 flex items-center gap-3">
+        <span class="flex-1">
+          <span class="block text-[11px] font-bold tracking-widest text-indigo-700 mb-1">ひとりで悩まないで</span>
+          <span class="block font-bold text-stone-800">霊視によるサポート</span>
+        </span>
+        <span class="step-chevron text-stone-300 shrink-0">▾</span>
+      </summary>
+      <div class="px-5 md:px-6 pb-5 md:pb-6">
+        <p class="text-sm text-stone-600 leading-relaxed mb-4">自分ひとりで闇雲（やみくも）に進めていると、見えたものや浮かんだ言葉の意味がわからず、悩んでしまうことがあります。瞑想で行き詰まったと感じたら、無理に自己判断せず、下のような相談例も参考にしてください。</p>
+
+        <div id="consultExamples" class="space-y-3 mb-4"></div>
+
+        <p class="text-xs text-stone-500 leading-relaxed">瞑想中に感じた不思議な映像や言葉の意味を霊視で分析してほしい方、本気で瞑想指導を受けたい方は、<span class="font-bold text-stone-700">ココナラ</span>までご相談ください。</p>
+      </div>
+    </details>
+  </section>
+
+
+</main>
+
+<footer class="border-t border-sand-200 bg-white">
+  <div class="max-w-5xl mx-auto px-4 py-8 text-center">
+    <p class="text-xs text-stone-400 leading-relaxed max-w-lg mx-auto">本教材は密教の正式な修法を再現するものではなく、現代人が安全に学べる内観トレーニングとして構成しています。強い不調を感じた場合は実践を中止し、休息や医療を優先してください。</p>
+    <p class="text-xs text-stone-300 mt-3">密教相承 梵輪開眼瞑想法</p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
