@@ -224,7 +224,7 @@
   let activePlayer = null;
   let wakeLock = null;
   let hallImpulse = null;
-  const MASTER_VOLUME = 0.74;
+  const MASTER_VOLUME = 0.92;
   const AUTO_FADE_SECONDS = 6;
 
   function getCtx() {
@@ -250,7 +250,7 @@
 
   function createHallImpulse(ctx) {
     if (hallImpulse) return hallImpulse;
-    const seconds = 4.4;
+    const seconds = 3.6;
     const length = Math.floor(ctx.sampleRate * seconds);
     const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
     for (let channel = 0; channel < 2; channel++) {
@@ -375,32 +375,32 @@
     const output = ctx.createGain();
 
     subCut.type = 'highpass';
-    subCut.frequency.value = 130;
+    subCut.frequency.value = 300;
     subCut.Q.value = 0.55;
     warmth.type = 'lowpass';
     warmth.frequency.value = 9000;
     warmth.Q.value = 0.25;
     brightness.type = 'highshelf';
     brightness.frequency.value = 1900;
-    brightness.gain.value = 1;
+    brightness.gain.value = 0.4;
     dry.gain.value = 0.9;
-    reverbSend.gain.value = 0.22;
+    reverbSend.gain.value = 0.18;
     preDelay.delayTime.value = 0.038;
     reverbTone.type = 'lowpass';
-    reverbTone.frequency.value = 6000;
+    reverbTone.frequency.value = 4500;
     reverbTone.Q.value = 0.3;
     convolver.buffer = createHallImpulse(ctx);
-    wet.gain.value = 0.15;
+    wet.gain.value = 0.12;
     master.gain.value = 0.0001;
     cleanTop.type = 'lowpass';
-    cleanTop.frequency.value = 5600;
+    cleanTop.frequency.value = 4200;
     cleanTop.Q.value = 0.3;
-    compressor.threshold.value = -14;
-    compressor.knee.value = 16;
-    compressor.ratio.value = 2;
-    compressor.attack.value = 0.065;
-    compressor.release.value = 0.75;
-    output.gain.value = 0.82;
+    compressor.threshold.value = -8;
+    compressor.knee.value = 8;
+    compressor.ratio.value = 3;
+    compressor.attack.value = 0.015;
+    compressor.release.value = 0.35;
+    output.gain.value = 0.95;
 
     input.connect(subCut);
     subCut.connect(warmth);
@@ -485,16 +485,17 @@
     const ctx = getCtx();
     const now = ctx.currentTime;
     const panner = ctx.createStereoPanner();
-    panner.pan.value = player.bellIndex % 2 ? 0.1 : -0.1;
+    panner.pan.value = player.bellIndex % 2 ? 0.2 : -0.2;
     panner.connect(player.input);
+    const sparkleFrequency = frequency < 600 ? frequency * 3 : frequency * 2;
     [
-      { ratio: 1, gain: 0.015, decay: 7.5 },
-      { ratio: 2.003, gain: 0.0025, decay: 4.8 },
+      { ratio: 1, gain: 0.014, decay: 3.4 },
+      { ratio: 1.5, gain: 0.0045, decay: 2.2 },
     ].forEach(partial => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sine';
-      osc.frequency.value = frequency * partial.ratio;
+      osc.frequency.value = sparkleFrequency * partial.ratio;
       osc.detune.value = (player.bellIndex % 3 - 1) * 1.3;
       gain.gain.setValueAtTime(0.0001, now);
       gain.gain.exponentialRampToValueAtTime(partial.gain, now + 0.055);
@@ -515,22 +516,12 @@
     const scheduleNext = () => {
       if (activePlayer !== player || player.autoFading) return;
       addBell(player, bellFreqs[player.bellIndex % bellFreqs.length]);
-      const delay = 24000 + (player.bellIndex % 4) * 3400;
+      const delay = 30000 + (player.bellIndex % 4) * 3600;
       const timer = setTimeout(scheduleNext, delay);
       player.bellTimers.push(timer);
     };
-    const firstBell = setTimeout(scheduleNext, 6000);
+    const firstBell = setTimeout(scheduleNext, 12000);
     player.bellTimers.push(firstBell);
-  }
-
-  function contemporaryRoot(frequency) {
-    const candidates = [frequency / 2, frequency / 4, frequency / 8]
-      .filter(value => value >= 130 && value <= 330);
-    return candidates.reduce((best, value) => {
-      const bestDistance = Math.abs(Math.log2(best / 220));
-      const distance = Math.abs(Math.log2(value / 220));
-      return distance < bestDistance ? value : best;
-    });
   }
 
   function playTone(freqs, durationSec, onTick, onEnd) {
@@ -545,13 +536,9 @@
 
     const voiceScale = 1 / Math.sqrt(freqs.length);
     freqs.forEach((frequency, index) => {
-      const root = contemporaryRoot(frequency);
       const side = index % 2 ? 1 : -1;
-      const tonePan = freqs.length === 1 ? 0 : side * 0.16;
-      addPadVoice(player, { frequency: root, gain: 0.038 * voiceScale, pan: side * 0.2, detune: -1.4, attack: 5 + index, breathe: 0.028 + index * 0.005 });
-      addPadVoice(player, { frequency: root * 1.25, gain: 0.026 * voiceScale, pan: side * -0.18, detune: 1.2, attack: 6 + index, breathe: 0.031 + index * 0.005 });
-      addPadVoice(player, { frequency: root * 1.5, gain: 0.03 * voiceScale, pan: side * 0.12, detune: 0, attack: 7, breathe: 0.021 });
-      addPadVoice(player, { frequency, gain: 0.042 * voiceScale, pan: tonePan, sine: true, detune: 0, attack: 2.8, breathe: 0.019 + index * 0.004 });
+      const tonePan = freqs.length === 1 ? 0 : side * 0.12;
+      addPadVoice(player, { frequency, gain: 0.28 * voiceScale, pan: tonePan, sine: true, detune: 0, attack: 1.8, breathe: 0.014 + index * 0.003 });
     });
     scheduleBells(player, freqs);
 
