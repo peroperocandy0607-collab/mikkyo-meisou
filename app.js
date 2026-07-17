@@ -224,7 +224,7 @@
   let activePlayer = null;
   let wakeLock = null;
   let hallImpulse = null;
-  const MASTER_VOLUME = 0.84;
+  const MASTER_VOLUME = 0.74;
   const AUTO_FADE_SECONDS = 6;
 
   function getCtx() {
@@ -250,7 +250,7 @@
 
   function createHallImpulse(ctx) {
     if (hallImpulse) return hallImpulse;
-    const seconds = 5.2;
+    const seconds = 4.4;
     const length = Math.floor(ctx.sampleRate * seconds);
     const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
     for (let channel = 0; channel < 2; channel++) {
@@ -370,33 +370,37 @@
     const convolver = ctx.createConvolver();
     const wet = ctx.createGain();
     const master = ctx.createGain();
+    const cleanTop = ctx.createBiquadFilter();
     const compressor = ctx.createDynamicsCompressor();
     const output = ctx.createGain();
 
     subCut.type = 'highpass';
-    subCut.frequency.value = 115;
+    subCut.frequency.value = 130;
     subCut.Q.value = 0.55;
     warmth.type = 'lowpass';
     warmth.frequency.value = 9000;
     warmth.Q.value = 0.25;
     brightness.type = 'highshelf';
     brightness.frequency.value = 1900;
-    brightness.gain.value = 1.8;
+    brightness.gain.value = 1;
     dry.gain.value = 0.9;
-    reverbSend.gain.value = 0.28;
+    reverbSend.gain.value = 0.22;
     preDelay.delayTime.value = 0.038;
     reverbTone.type = 'lowpass';
-    reverbTone.frequency.value = 7600;
+    reverbTone.frequency.value = 6000;
     reverbTone.Q.value = 0.3;
     convolver.buffer = createHallImpulse(ctx);
-    wet.gain.value = 0.2;
+    wet.gain.value = 0.15;
     master.gain.value = 0.0001;
-    compressor.threshold.value = -20;
-    compressor.knee.value = 18;
-    compressor.ratio.value = 3.1;
-    compressor.attack.value = 0.04;
-    compressor.release.value = 0.62;
-    output.gain.value = 0.9;
+    cleanTop.type = 'lowpass';
+    cleanTop.frequency.value = 5600;
+    cleanTop.Q.value = 0.3;
+    compressor.threshold.value = -14;
+    compressor.knee.value = 16;
+    compressor.ratio.value = 2;
+    compressor.attack.value = 0.065;
+    compressor.release.value = 0.75;
+    output.gain.value = 0.82;
 
     input.connect(subCut);
     subCut.connect(warmth);
@@ -409,20 +413,21 @@
     reverbTone.connect(convolver);
     convolver.connect(wet);
     wet.connect(master);
-    master.connect(compressor);
+    master.connect(cleanTop);
+    cleanTop.connect(compressor);
     compressor.connect(output);
     output.connect(ctx.destination);
 
     const wave = ctx.createPeriodicWave(
       new Float32Array([0, 0, 0, 0, 0, 0]),
-      new Float32Array([0, 1, 0.115, 0.042, 0.018, 0.007]),
+      new Float32Array([0, 1, 0.07, 0.018, 0.005, 0.0015]),
       { disableNormalization: false }
     );
 
     return {
       input, gain: master, wave,
       sources: [],
-      nodes: [input, subCut, warmth, brightness, dry, reverbSend, preDelay, reverbTone, convolver, wet, master, compressor, output],
+      nodes: [input, subCut, warmth, brightness, dry, reverbSend, preDelay, reverbTone, convolver, wet, master, cleanTop, compressor, output],
       bellTimers: [],
       timer: null,
       endTimer: null,
@@ -475,58 +480,16 @@
     player.nodes.push(voiceGain, panner, amplitudeDepth, panDepth);
   }
 
-  function addAirTexture(player) {
-    const ctx = getCtx();
-    const seconds = 9;
-    const length = ctx.sampleRate * seconds;
-    const buffer = ctx.createBuffer(2, length, ctx.sampleRate);
-    for (let channel = 0; channel < 2; channel++) {
-      const data = buffer.getChannelData(channel);
-      const random = seededRandom(528963 + channel * 3571);
-      let softened = 0;
-      for (let i = 0; i < length; i++) {
-        const white = random() * 2 - 1;
-        softened = white * 0.18 + softened * 0.82;
-        data[i] = (white * 0.38 + softened * 0.62) * 0.22;
-      }
-    }
-    const source = ctx.createBufferSource();
-    const highpass = ctx.createBiquadFilter();
-    const lowpass = ctx.createBiquadFilter();
-    const gain = ctx.createGain();
-    const breath = ctx.createOscillator();
-    const breathDepth = ctx.createGain();
-    source.buffer = buffer;
-    source.loop = true;
-    highpass.type = 'highpass';
-    highpass.frequency.value = 520;
-    lowpass.type = 'lowpass';
-    lowpass.frequency.value = 4800;
-    gain.gain.value = 0.0042;
-    breath.frequency.value = 0.026;
-    breathDepth.gain.value = 0.0011;
-    source.connect(highpass);
-    highpass.connect(lowpass);
-    lowpass.connect(gain);
-    breath.connect(breathDepth);
-    breathDepth.connect(gain.gain);
-    gain.connect(player.input);
-    startSource(player, source);
-    startSource(player, breath);
-    player.nodes.push(highpass, lowpass, gain, breathDepth);
-  }
-
   function addBell(player, frequency) {
     if (activePlayer !== player || player.autoFading) return;
     const ctx = getCtx();
     const now = ctx.currentTime;
     const panner = ctx.createStereoPanner();
-    panner.pan.value = player.bellIndex % 2 ? 0.14 : -0.14;
+    panner.pan.value = player.bellIndex % 2 ? 0.1 : -0.1;
     panner.connect(player.input);
     [
-      { ratio: 1, gain: 0.024, decay: 9.2 },
-      { ratio: 2.003, gain: 0.0048, decay: 6.2 },
-      { ratio: 3.997, gain: 0.0014, decay: 4.2 },
+      { ratio: 1, gain: 0.015, decay: 7.5 },
+      { ratio: 2.003, gain: 0.0025, decay: 4.8 },
     ].forEach(partial => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -552,11 +515,11 @@
     const scheduleNext = () => {
       if (activePlayer !== player || player.autoFading) return;
       addBell(player, bellFreqs[player.bellIndex % bellFreqs.length]);
-      const delay = 20000 + (player.bellIndex % 4) * 3200;
+      const delay = 24000 + (player.bellIndex % 4) * 3400;
       const timer = setTimeout(scheduleNext, delay);
       player.bellTimers.push(timer);
     };
-    const firstBell = setTimeout(scheduleNext, 4000);
+    const firstBell = setTimeout(scheduleNext, 6000);
     player.bellTimers.push(firstBell);
   }
 
@@ -588,10 +551,8 @@
       addPadVoice(player, { frequency: root, gain: 0.038 * voiceScale, pan: side * 0.2, detune: -1.4, attack: 5 + index, breathe: 0.028 + index * 0.005 });
       addPadVoice(player, { frequency: root * 1.25, gain: 0.026 * voiceScale, pan: side * -0.18, detune: 1.2, attack: 6 + index, breathe: 0.031 + index * 0.005 });
       addPadVoice(player, { frequency: root * 1.5, gain: 0.03 * voiceScale, pan: side * 0.12, detune: 0, attack: 7, breathe: 0.021 });
-      addPadVoice(player, { frequency, gain: 0.052 * voiceScale, pan: tonePan, sine: true, detune: 0, attack: 2.8, breathe: 0.019 + index * 0.004 });
-      addPadVoice(player, { frequency: frequency * 2, gain: 0.004 * voiceScale, pan: side * -0.24, sine: true, detune: 0, attack: 5, breathe: 0.017 });
+      addPadVoice(player, { frequency, gain: 0.042 * voiceScale, pan: tonePan, sine: true, detune: 0, attack: 2.8, breathe: 0.019 + index * 0.004 });
     });
-    addAirTexture(player);
     scheduleBells(player, freqs);
 
     const startedAt = Date.now();
