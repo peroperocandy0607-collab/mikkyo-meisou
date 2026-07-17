@@ -221,14 +221,90 @@
      WEB AUDIO ENGINE — tones are synthesized on the fly, nothing to download
   ============================================================ */
   let audioCtx = null;
-  let activePlayer = null; // { id, oscillators, gain, stopFn }
+  let activePlayer = null;
   let wakeLock = null;
-  const MASTER_VOLUME = 0.4; // audible on phone speakers without headphones
+  let hallImpulse = null;
+  const MASTER_VOLUME = 0.84;
+  const AUTO_FADE_SECONDS = 6;
 
   function getCtx() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      try {
+        audioCtx = new AudioContextClass({ latencyHint: 'playback', sampleRate: 48000 });
+      } catch (e) {
+        audioCtx = new AudioContextClass();
+      }
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
     return audioCtx;
+  }
+
+  function seededRandom(seed) {
+    let value = seed >>> 0;
+    return () => {
+      value = (value * 1664525 + 1013904223) >>> 0;
+      return value / 4294967296;
+    };
+  }
+
+  function createHallImpulse(ctx) {
+    if (hallImpulse) return hallImpulse;
+    const seconds = 5.2;
+    const length = Math.floor(ctx.sampleRate * seconds);
+    const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
+    for (let channel = 0; channel < 2; channel++) {
+      const data = impulse.getChannelData(channel);
+      const random = seededRandom(20260717 + channel * 7919);
+      let smoothed = 0;
+      for (let i = 0; i < length; i++) {
+        const time = i / ctx.sampleRate;
+        const envelope = Math.pow(1 - i / length, 3.05);
+        const highDamping = 0.52 + 0.48 * Math.exp(-time / 1.8);
+        const noise = random() * 2 - 1;
+        smoothed = noise * highDamping + smoothed * (1 - highDamping);
+        data[i] = smoothed * envelope;
+      }
+      [0.039, 0.071, 0.113, 0.167].forEach((delay, index) => {
+        const position = Math.floor((delay + channel * 0.0035) * ctx.sampleRate);
+        if (position < length) data[position] += 0.32 / (index + 1);
+      });
+    }
+    hallImpulse = impulse;
+    return impulse;
+  }
+
+  function holdParam(param, now) {
+    if (typeof param.cancelAndHoldAtTime === 'function') {
+      param.cancelAndHoldAtTime(now);
+    } else {
+      const current = Math.max(0.0001, param.value);
+      param.cancelScheduledValues(now);
+      param.setValueAtTime(current, now);
+    }
+  }
+
+  function clearPlayerTimers(player) {
+    clearInterval(player.timer);
+    clearTimeout(player.endTimer);
+    clearTimeout(player.finishTimer);
+    player.bellTimers.forEach(timer => clearTimeout(timer));
+    player.bellTimers.length = 0;
+  }
+
+  function stopPlayerNodes(player, delaySeconds) {
+    const stopAt = audioCtx.currentTime + delaySeconds;
+    player.sources.forEach(source => {
+      try { source.stop(stopAt); } catch (e) {}
+    });
+    setTimeout(() => {
+      player.sources.forEach(source => {
+        try { source.disconnect(); } catch (e) {}
+      });
+      player.nodes.forEach(node => {
+        try { node.disconnect(); } catch (e) {}
+      });
+    }, (delaySeconds + 0.2) * 1000);
   }
 
   async function requestWakeLock() {
@@ -251,49 +327,279 @@
 
   function stopActivePlayer() {
     if (!activePlayer) return;
+    const player = activePlayer;
+    activePlayer = null;
     const ctx = getCtx();
     const now = ctx.currentTime;
-    activePlayer.gain.gain.cancelScheduledValues(now);
-    activePlayer.gain.gain.setValueAtTime(activePlayer.gain.gain.value, now);
-    activePlayer.gain.gain.linearRampToValueAtTime(0, now + 0.4);
-    activePlayer.oscillators.forEach(o => o.stop(now + 0.45));
-    clearInterval(activePlayer.timer);
+    clearPlayerTimers(player);
+    holdParam(player.gain.gain, now);
+    player.gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.2);
+    stopPlayerNodes(player, 2.3);
     releaseWakeLock();
-    if (activePlayer.onStop) activePlayer.onStop();
-    activePlayer = null;
+    if (player.onStop) player.onStop();
+  }
+
+  function beginAutoFade(player) {
+    if (activePlayer !== player || player.autoFading) return;
+    player.autoFading = true;
+    const ctx = getCtx();
+    const now = ctx.currentTime;
+    player.bellTimers.forEach(timer => clearTimeout(timer));
+    player.bellTimers.length = 0;
+    holdParam(player.gain.gain, now);
+    player.gain.gain.exponentialRampToValueAtTime(0.0001, now + AUTO_FADE_SECONDS);
+    player.finishTimer = setTimeout(() => {
+      if (activePlayer !== player) return;
+      activePlayer = null;
+      clearPlayerTimers(player);
+      stopPlayerNodes(player, 0.05);
+      releaseWakeLock();
+      if (player.onStop) player.onStop();
+    }, AUTO_FADE_SECONDS * 1000);
+  }
+
+  function makePlayer(ctx) {
+    const input = ctx.createGain();
+    const subCut = ctx.createBiquadFilter();
+    const warmth = ctx.createBiquadFilter();
+    const brightness = ctx.createBiquadFilter();
+    const dry = ctx.createGain();
+    const reverbSend = ctx.createGain();
+    const preDelay = ctx.createDelay(0.2);
+    const reverbTone = ctx.createBiquadFilter();
+    const convolver = ctx.createConvolver();
+    const wet = ctx.createGain();
+    const master = ctx.createGain();
+    const compressor = ctx.createDynamicsCompressor();
+    const output = ctx.createGain();
+
+    subCut.type = 'highpass';
+    subCut.frequency.value = 115;
+    subCut.Q.value = 0.55;
+    warmth.type = 'lowpass';
+    warmth.frequency.value = 9000;
+    warmth.Q.value = 0.25;
+    brightness.type = 'highshelf';
+    brightness.frequency.value = 1900;
+    brightness.gain.value = 1.8;
+    dry.gain.value = 0.9;
+    reverbSend.gain.value = 0.28;
+    preDelay.delayTime.value = 0.038;
+    reverbTone.type = 'lowpass';
+    reverbTone.frequency.value = 7600;
+    reverbTone.Q.value = 0.3;
+    convolver.buffer = createHallImpulse(ctx);
+    wet.gain.value = 0.2;
+    master.gain.value = 0.0001;
+    compressor.threshold.value = -20;
+    compressor.knee.value = 18;
+    compressor.ratio.value = 3.1;
+    compressor.attack.value = 0.04;
+    compressor.release.value = 0.62;
+    output.gain.value = 0.9;
+
+    input.connect(subCut);
+    subCut.connect(warmth);
+    warmth.connect(brightness);
+    brightness.connect(dry);
+    dry.connect(master);
+    brightness.connect(reverbSend);
+    reverbSend.connect(preDelay);
+    preDelay.connect(reverbTone);
+    reverbTone.connect(convolver);
+    convolver.connect(wet);
+    wet.connect(master);
+    master.connect(compressor);
+    compressor.connect(output);
+    output.connect(ctx.destination);
+
+    const wave = ctx.createPeriodicWave(
+      new Float32Array([0, 0, 0, 0, 0, 0]),
+      new Float32Array([0, 1, 0.115, 0.042, 0.018, 0.007]),
+      { disableNormalization: false }
+    );
+
+    return {
+      input, gain: master, wave,
+      sources: [],
+      nodes: [input, subCut, warmth, brightness, dry, reverbSend, preDelay, reverbTone, convolver, wet, master, compressor, output],
+      bellTimers: [],
+      timer: null,
+      endTimer: null,
+      finishTimer: null,
+      autoFading: false,
+      bellIndex: 0,
+      onStop: null,
+    };
+  }
+
+  function startSource(player, source) {
+    source.start();
+    player.sources.push(source);
+  }
+
+  function addPadVoice(player, options) {
+    const ctx = getCtx();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const voiceGain = ctx.createGain();
+    const panner = ctx.createStereoPanner();
+    const amplitudeLfo = ctx.createOscillator();
+    const amplitudeDepth = ctx.createGain();
+    const panLfo = ctx.createOscillator();
+    const panDepth = ctx.createGain();
+
+    if (options.sine) osc.type = 'sine';
+    else osc.setPeriodicWave(player.wave);
+    osc.frequency.value = options.frequency;
+    osc.detune.value = options.detune || 0;
+    voiceGain.gain.setValueAtTime(0.0001, now);
+    voiceGain.gain.exponentialRampToValueAtTime(options.gain, now + options.attack);
+    panner.pan.value = options.pan || 0;
+    amplitudeLfo.frequency.value = options.breathe;
+    amplitudeDepth.gain.value = options.gain * 0.07;
+    panLfo.frequency.value = options.breathe * 0.61;
+    panDepth.gain.value = 0.075;
+
+    osc.connect(voiceGain);
+    amplitudeLfo.connect(amplitudeDepth);
+    amplitudeDepth.connect(voiceGain.gain);
+    voiceGain.connect(panner);
+    panLfo.connect(panDepth);
+    panDepth.connect(panner.pan);
+    panner.connect(player.input);
+
+    startSource(player, osc);
+    startSource(player, amplitudeLfo);
+    startSource(player, panLfo);
+    player.nodes.push(voiceGain, panner, amplitudeDepth, panDepth);
+  }
+
+  function addAirTexture(player) {
+    const ctx = getCtx();
+    const seconds = 9;
+    const length = ctx.sampleRate * seconds;
+    const buffer = ctx.createBuffer(2, length, ctx.sampleRate);
+    for (let channel = 0; channel < 2; channel++) {
+      const data = buffer.getChannelData(channel);
+      const random = seededRandom(528963 + channel * 3571);
+      let softened = 0;
+      for (let i = 0; i < length; i++) {
+        const white = random() * 2 - 1;
+        softened = white * 0.18 + softened * 0.82;
+        data[i] = (white * 0.38 + softened * 0.62) * 0.22;
+      }
+    }
+    const source = ctx.createBufferSource();
+    const highpass = ctx.createBiquadFilter();
+    const lowpass = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+    const breath = ctx.createOscillator();
+    const breathDepth = ctx.createGain();
+    source.buffer = buffer;
+    source.loop = true;
+    highpass.type = 'highpass';
+    highpass.frequency.value = 520;
+    lowpass.type = 'lowpass';
+    lowpass.frequency.value = 4800;
+    gain.gain.value = 0.0042;
+    breath.frequency.value = 0.026;
+    breathDepth.gain.value = 0.0011;
+    source.connect(highpass);
+    highpass.connect(lowpass);
+    lowpass.connect(gain);
+    breath.connect(breathDepth);
+    breathDepth.connect(gain.gain);
+    gain.connect(player.input);
+    startSource(player, source);
+    startSource(player, breath);
+    player.nodes.push(highpass, lowpass, gain, breathDepth);
+  }
+
+  function addBell(player, frequency) {
+    if (activePlayer !== player || player.autoFading) return;
+    const ctx = getCtx();
+    const now = ctx.currentTime;
+    const panner = ctx.createStereoPanner();
+    panner.pan.value = player.bellIndex % 2 ? 0.14 : -0.14;
+    panner.connect(player.input);
+    [
+      { ratio: 1, gain: 0.024, decay: 9.2 },
+      { ratio: 2.003, gain: 0.0048, decay: 6.2 },
+      { ratio: 3.997, gain: 0.0014, decay: 4.2 },
+    ].forEach(partial => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = frequency * partial.ratio;
+      osc.detune.value = (player.bellIndex % 3 - 1) * 1.3;
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(partial.gain, now + 0.055);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + partial.decay);
+      osc.connect(gain);
+      gain.connect(panner);
+      osc.start(now);
+      osc.stop(now + partial.decay + 0.1);
+      player.sources.push(osc);
+      player.nodes.push(gain);
+    });
+    player.nodes.push(panner);
+    player.bellIndex += 1;
+  }
+
+  function scheduleBells(player, freqs) {
+    const bellFreqs = freqs.slice();
+    const scheduleNext = () => {
+      if (activePlayer !== player || player.autoFading) return;
+      addBell(player, bellFreqs[player.bellIndex % bellFreqs.length]);
+      const delay = 20000 + (player.bellIndex % 4) * 3200;
+      const timer = setTimeout(scheduleNext, delay);
+      player.bellTimers.push(timer);
+    };
+    const firstBell = setTimeout(scheduleNext, 4000);
+    player.bellTimers.push(firstBell);
+  }
+
+  function contemporaryRoot(frequency) {
+    const candidates = [frequency / 2, frequency / 4, frequency / 8]
+      .filter(value => value >= 130 && value <= 330);
+    return candidates.reduce((best, value) => {
+      const bestDistance = Math.abs(Math.log2(best / 220));
+      const distance = Math.abs(Math.log2(value / 220));
+      return distance < bestDistance ? value : best;
+    });
   }
 
   function playTone(freqs, durationSec, onTick, onEnd) {
     stopActivePlayer();
     const ctx = getCtx();
     requestWakeLock();
-    const master = ctx.createGain();
-    master.gain.setValueAtTime(0, ctx.currentTime);
-    master.gain.linearRampToValueAtTime(MASTER_VOLUME, ctx.currentTime + 0.6);
-    master.connect(ctx.destination);
+    const player = makePlayer(ctx);
+    activePlayer = player;
+    const now = ctx.currentTime;
+    player.gain.gain.setValueAtTime(0.0001, now);
+    player.gain.gain.exponentialRampToValueAtTime(MASTER_VOLUME, now + 6.2);
 
-    const oscillators = freqs.map(f => {
-      const osc = ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.value = f;
-      const g = ctx.createGain();
-      g.gain.value = 1 / freqs.length;
-      osc.connect(g).connect(master);
-      osc.start();
-      return osc;
+    const voiceScale = 1 / Math.sqrt(freqs.length);
+    freqs.forEach((frequency, index) => {
+      const root = contemporaryRoot(frequency);
+      const side = index % 2 ? 1 : -1;
+      const tonePan = freqs.length === 1 ? 0 : side * 0.16;
+      addPadVoice(player, { frequency: root, gain: 0.038 * voiceScale, pan: side * 0.2, detune: -1.4, attack: 5 + index, breathe: 0.028 + index * 0.005 });
+      addPadVoice(player, { frequency: root * 1.25, gain: 0.026 * voiceScale, pan: side * -0.18, detune: 1.2, attack: 6 + index, breathe: 0.031 + index * 0.005 });
+      addPadVoice(player, { frequency: root * 1.5, gain: 0.03 * voiceScale, pan: side * 0.12, detune: 0, attack: 7, breathe: 0.021 });
+      addPadVoice(player, { frequency, gain: 0.052 * voiceScale, pan: tonePan, sine: true, detune: 0, attack: 2.8, breathe: 0.019 + index * 0.004 });
+      addPadVoice(player, { frequency: frequency * 2, gain: 0.004 * voiceScale, pan: side * -0.24, sine: true, detune: 0, attack: 5, breathe: 0.017 });
     });
+    addAirTexture(player);
+    scheduleBells(player, freqs);
 
     const startedAt = Date.now();
-    const timer = setInterval(() => onTick((Date.now() - startedAt) / 1000), 250);
-
-    const stopFn = () => { clearInterval(timer); };
-    activePlayer = {
-      oscillators, gain: master, timer,
-      onStop: () => { stopFn(); if (onEnd) onEnd(); },
-    };
-
+    player.timer = setInterval(() => onTick((Date.now() - startedAt) / 1000), 250);
+    player.onStop = () => { if (onEnd) onEnd(); };
     if (durationSec) {
-      setTimeout(() => { if (activePlayer && activePlayer.timer === timer) stopActivePlayer(); }, durationSec * 1000);
+      const fadeStart = Math.max(0, durationSec - AUTO_FADE_SECONDS);
+      player.endTimer = setTimeout(() => beginAutoFade(player), fadeStart * 1000);
     }
   }
 
